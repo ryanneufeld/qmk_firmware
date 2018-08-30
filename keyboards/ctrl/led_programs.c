@@ -58,7 +58,7 @@ led_setup_t leds_blue[] = {
 
 //White
 led_setup_t leds_white[] = {
-    { .hs = 0, .he = 100, .rs = 255, .re = 255, .gs = 255, .ge = 255, .bs = 255, .be = 255, .ef = EF_NONE },
+    { .hs = 0, .he = 100, .rs = 245, .re = 245, .gs = 255, .ge = 255, .bs = 255, .be = 255, .ef = EF_NONE },
     { .end = 1 },
 };
 
@@ -104,6 +104,7 @@ led_setup_t leds_rainbow_s[] = {
 //Add the new animation name to the list below following its format
 
 void *led_setups[] = {
+    leds_white,
     leds_rainbow_s,
     leds_rainbow_ns,
     leds_teal_salmon,
@@ -111,7 +112,6 @@ void *led_setups[] = {
     leds_red,
     leds_green,
     leds_blue,
-    leds_white,
     leds_white_with_red_stripe,
     leds_black_with_red_stripe,
     leds_off
