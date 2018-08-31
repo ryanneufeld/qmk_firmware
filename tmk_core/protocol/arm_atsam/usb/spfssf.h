@@ -1,6 +1,11 @@
 #ifndef ____spfssf_h
 #define ____spfssf_h
 
+<<<<<<< HEAD
+=======
+#include <stdarg.h>
+
+>>>>>>> master
 #define sprintf spf
 #define sscanf  ssf
 

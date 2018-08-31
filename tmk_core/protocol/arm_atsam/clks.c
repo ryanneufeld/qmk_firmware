@@ -27,23 +27,40 @@ volatile uint8_t us_delay_done;
 const uint32_t sercom_apbbase[] = {(uint32_t)SERCOM0,(uint32_t)SERCOM1,(uint32_t)SERCOM2,(uint32_t)SERCOM3,(uint32_t)SERCOM4,(uint32_t)SERCOM5};
 const uint8_t sercom_pchan[] = {7, 8, 23, 24, 34, 35};
 
+<<<<<<< HEAD
+=======
+#define USE_DPLL_IND    0
+#define USE_DPLL_DEF    GCLK_SOURCE_DPLL0
+
+>>>>>>> master
 void CLK_oscctrl_init(void)
 {
     Oscctrl *posctrl = OSCCTRL;
     Gclk *pgclk = GCLK;
 
+<<<<<<< HEAD
+=======
+    DBGC(DC_CLK_OSC_INIT_BEGIN);
+
+>>>>>>> master
     //default setup on por
     system_clks.freq_dfll = FREQ_DFLL_DEFAULT;
     system_clks.freq_gclk[0] = system_clks.freq_dfll;
 
     //configure and startup 16MHz xosc0
+<<<<<<< HEAD
     posctrl->XOSCCTRL[0].bit.STARTUP = 7;
+=======
+    posctrl->XOSCCTRL[0].bit.ENABLE = 0;
+    posctrl->XOSCCTRL[0].bit.STARTUP = 0xD;
+>>>>>>> master
     posctrl->XOSCCTRL[0].bit.ENALC = 1;
     posctrl->XOSCCTRL[0].bit.IMULT = 5;
     posctrl->XOSCCTRL[0].bit.IPTAT = 3;
     posctrl->XOSCCTRL[0].bit.ONDEMAND = 0;
     posctrl->XOSCCTRL[0].bit.XTALEN = 1;
     posctrl->XOSCCTRL[0].bit.ENABLE = 1;
+<<<<<<< HEAD
     while (posctrl->STATUS.bit.XOSCRDY0==0) {}  //wait for xosc0 stable and ready
     system_clks.freq_xosc0 = FREQ_XOSC0;
 
@@ -63,6 +80,32 @@ void CLK_oscctrl_init(void)
     pgclk->GENCTRL[GEN_DPLL0].bit.SRC = GCLK_SOURCE_DPLL0;
     while (pgclk->SYNCBUSY.bit.GENCTRL0) {}
     system_clks.freq_gclk[0] = system_clks.freq_dpll[0];
+=======
+    while (posctrl->STATUS.bit.XOSCRDY0 == 0) { DBGC(DC_CLK_OSC_INIT_XOSC0_SYNC); }
+    system_clks.freq_xosc0 = FREQ_XOSC0;
+
+    //configure and startup DPLL
+    posctrl->Dpll[USE_DPLL_IND].DPLLCTRLA.bit.ENABLE = 0;
+    while (posctrl->Dpll[USE_DPLL_IND].DPLLSYNCBUSY.bit.ENABLE) { DBGC(DC_CLK_OSC_INIT_DPLL_SYNC_DISABLE); }
+    posctrl->Dpll[USE_DPLL_IND].DPLLCTRLB.bit.REFCLK = 2;              //select XOSC0 (16MHz)
+    posctrl->Dpll[USE_DPLL_IND].DPLLCTRLB.bit.DIV = 7;                 //16 MHz / (2 * (7 + 1)) = 1 MHz
+    posctrl->Dpll[USE_DPLL_IND].DPLLRATIO.bit.LDR = PLL_RATIO;         //1 MHz * (PLL_RATIO(47) + 1) = 48MHz
+    while (posctrl->Dpll[USE_DPLL_IND].DPLLSYNCBUSY.bit.DPLLRATIO) { DBGC(DC_CLK_OSC_INIT_DPLL_SYNC_RATIO); }
+    posctrl->Dpll[USE_DPLL_IND].DPLLCTRLA.bit.ONDEMAND = 0;
+    posctrl->Dpll[USE_DPLL_IND].DPLLCTRLA.bit.ENABLE = 1;
+    while (posctrl->Dpll[USE_DPLL_IND].DPLLSYNCBUSY.bit.ENABLE) { DBGC(DC_CLK_OSC_INIT_DPLL_SYNC_ENABLE); }
+    while (posctrl->Dpll[USE_DPLL_IND].DPLLSTATUS.bit.LOCK == 0) { DBGC(DC_CLK_OSC_INIT_DPLL_WAIT_LOCK); }
+    while (posctrl->Dpll[USE_DPLL_IND].DPLLSTATUS.bit.CLKRDY == 0) { DBGC(DC_CLK_OSC_INIT_DPLL_WAIT_CLKRDY); }
+    system_clks.freq_dpll[0] = (system_clks.freq_xosc0 / 2 / (posctrl->Dpll[USE_DPLL_IND].DPLLCTRLB.bit.DIV + 1)) * (posctrl->Dpll[USE_DPLL_IND].DPLLRATIO.bit.LDR + 1);
+
+    //change gclk0 to DPLL
+    pgclk->GENCTRL[GEN_DPLL0].bit.SRC = USE_DPLL_DEF;
+    while (pgclk->SYNCBUSY.bit.GENCTRL0) { DBGC(DC_CLK_OSC_INIT_GCLK_SYNC_GENCTRL0); }
+
+    system_clks.freq_gclk[0] = system_clks.freq_dpll[0];
+
+    DBGC(DC_CLK_OSC_INIT_COMPLETE);
+>>>>>>> master
 }
 
 //configure for 1MHz (1 usec timebase)
@@ -71,6 +114,7 @@ uint32_t CLK_set_gclk_freq(uint8_t gclkn, uint32_t freq)
 {
     Gclk *pgclk = GCLK;
 
+<<<<<<< HEAD
     while (pgclk->SYNCBUSY.vec.GENCTRL) {}
     pgclk->GENCTRL[gclkn].bit.SRC = GCLK_SOURCE_DPLL0;
     while (pgclk->SYNCBUSY.vec.GENCTRL) {}
@@ -81,6 +125,23 @@ uint32_t CLK_set_gclk_freq(uint8_t gclkn, uint32_t freq)
     pgclk->GENCTRL[gclkn].bit.GENEN = 1;
     while (pgclk->SYNCBUSY.vec.GENCTRL) {}
     system_clks.freq_gclk[gclkn] = system_clks.freq_dpll[0] / pgclk->GENCTRL[gclkn].bit.DIV;
+=======
+    DBGC(DC_CLK_SET_GCLK_FREQ_BEGIN);
+
+    while (pgclk->SYNCBUSY.vec.GENCTRL) { DBGC(DC_CLK_SET_GCLK_FREQ_SYNC_1); }
+    pgclk->GENCTRL[gclkn].bit.SRC = USE_DPLL_DEF;
+    while (pgclk->SYNCBUSY.vec.GENCTRL) { DBGC(DC_CLK_SET_GCLK_FREQ_SYNC_2); }
+    pgclk->GENCTRL[gclkn].bit.DIV = (uint8_t)(system_clks.freq_dpll[0] / freq);
+    while (pgclk->SYNCBUSY.vec.GENCTRL) { DBGC(DC_CLK_SET_GCLK_FREQ_SYNC_3); }
+    pgclk->GENCTRL[gclkn].bit.DIVSEL = 0;
+    while (pgclk->SYNCBUSY.vec.GENCTRL) { DBGC(DC_CLK_SET_GCLK_FREQ_SYNC_4); }
+    pgclk->GENCTRL[gclkn].bit.GENEN = 1;
+    while (pgclk->SYNCBUSY.vec.GENCTRL) { DBGC(DC_CLK_SET_GCLK_FREQ_SYNC_5); }
+    system_clks.freq_gclk[gclkn] = system_clks.freq_dpll[0] / pgclk->GENCTRL[gclkn].bit.DIV;
+
+    DBGC(DC_CLK_SET_GCLK_FREQ_COMPLETE);
+
+>>>>>>> master
     return system_clks.freq_gclk[gclkn];
 }
 
@@ -89,6 +150,7 @@ void CLK_init_osc(void)
     uint8_t gclkn = GEN_OSC0;
     Gclk *pgclk = GCLK;
 
+<<<<<<< HEAD
     while (pgclk->SYNCBUSY.vec.GENCTRL) {}
     pgclk->GENCTRL[gclkn].bit.SRC = GCLK_SOURCE_XOSC0;
     while (pgclk->SYNCBUSY.vec.GENCTRL) {}
@@ -99,6 +161,22 @@ void CLK_init_osc(void)
     pgclk->GENCTRL[gclkn].bit.GENEN = 1;
     while (pgclk->SYNCBUSY.vec.GENCTRL) {}
     system_clks.freq_gclk[gclkn] = system_clks.freq_xosc0;
+=======
+    DBGC(DC_CLK_INIT_OSC_BEGIN);
+
+    while (pgclk->SYNCBUSY.vec.GENCTRL) { DBGC(DC_CLK_INIT_OSC_SYNC_1); }
+    pgclk->GENCTRL[gclkn].bit.SRC = GCLK_SOURCE_XOSC0;
+    while (pgclk->SYNCBUSY.vec.GENCTRL) { DBGC(DC_CLK_INIT_OSC_SYNC_2); }
+    pgclk->GENCTRL[gclkn].bit.DIV = 1;
+    while (pgclk->SYNCBUSY.vec.GENCTRL) { DBGC(DC_CLK_INIT_OSC_SYNC_3); }
+    pgclk->GENCTRL[gclkn].bit.DIVSEL = 0;
+    while (pgclk->SYNCBUSY.vec.GENCTRL) { DBGC(DC_CLK_INIT_OSC_SYNC_4); }
+    pgclk->GENCTRL[gclkn].bit.GENEN = 1;
+    while (pgclk->SYNCBUSY.vec.GENCTRL) { DBGC(DC_CLK_INIT_OSC_SYNC_5); }
+    system_clks.freq_gclk[gclkn] = system_clks.freq_xosc0;
+
+    DBGC(DC_CLK_INIT_OSC_COMPLETE);
+>>>>>>> master
 }
 
 void CLK_reset_time(void)
@@ -108,6 +186,11 @@ void CLK_reset_time(void)
 
     ms_clk = 0;
 
+<<<<<<< HEAD
+=======
+    DBGC(DC_CLK_RESET_TIME_BEGIN);
+
+>>>>>>> master
     //stop counters
     ptc4->COUNT16.CTRLA.bit.ENABLE = 0;
     while (ptc4->COUNT16.SYNCBUSY.bit.ENABLE) {}
@@ -123,6 +206,11 @@ void CLK_reset_time(void)
     while (ptc0->COUNT32.SYNCBUSY.bit.ENABLE) {}
     ptc4->COUNT16.CTRLA.bit.ENABLE = 1;
     while (ptc4->COUNT16.SYNCBUSY.bit.ENABLE) {}
+<<<<<<< HEAD
+=======
+
+    DBGC(DC_CLK_RESET_TIME_COMPLETE);
+>>>>>>> master
 }
 
 void TC4_Handler()
@@ -154,6 +242,11 @@ uint32_t CLK_enable_timebase(void)
     Tc *ptc0 = TC0;
     Evsys *pevsys = EVSYS;
 
+<<<<<<< HEAD
+=======
+    DBGC(DC_CLK_ENABLE_TIMEBASE_BEGIN);
+
+>>>>>>> master
     //gclk2  highspeed time base
     CLK_set_gclk_freq(GEN_TC45, FREQ_TC45_DEFAULT);
     CLK_init_osc();
@@ -169,18 +262,33 @@ uint32_t CLK_enable_timebase(void)
     pgclk->PCHCTRL[TC5_GCLK_ID].bit.CHEN = 1;
 
     //configure TC4
+<<<<<<< HEAD
     ptc4->COUNT16.CTRLA.bit.ENABLE = 0;
     while (ptc4->COUNT16.SYNCBUSY.bit.ENABLE) {}
     ptc4->COUNT16.CTRLA.bit.SWRST = 1;
     while (ptc4->COUNT16.SYNCBUSY.bit.SWRST) {}
     while (ptc4->COUNT16.CTRLA.bit.SWRST) {}
+=======
+    DBGC(DC_CLK_ENABLE_TIMEBASE_TC4_BEGIN);
+    ptc4->COUNT16.CTRLA.bit.ENABLE = 0;
+    while (ptc4->COUNT16.SYNCBUSY.bit.ENABLE) { DBGC(DC_CLK_ENABLE_TIMEBASE_TC4_SYNC_DISABLE); }
+    ptc4->COUNT16.CTRLA.bit.SWRST = 1;
+    while (ptc4->COUNT16.SYNCBUSY.bit.SWRST) { DBGC(DC_CLK_ENABLE_TIMEBASE_TC4_SYNC_SWRST_1); }
+    while (ptc4->COUNT16.CTRLA.bit.SWRST) { DBGC(DC_CLK_ENABLE_TIMEBASE_TC4_SYNC_SWRST_2); }
+>>>>>>> master
 
     //CTRLA defaults
     //CTRLB as default, counting up
     ptc4->COUNT16.CTRLBCLR.reg = 5;
+<<<<<<< HEAD
     while (ptc4->COUNT16.SYNCBUSY.bit.CTRLB) {}
     ptc4->COUNT16.CC[0].reg = 999;
     while (ptc4->COUNT16.SYNCBUSY.bit.CC0) {}
+=======
+    while (ptc4->COUNT16.SYNCBUSY.bit.CTRLB) { DBGC(DC_CLK_ENABLE_TIMEBASE_TC4_SYNC_CLTRB); }
+    ptc4->COUNT16.CC[0].reg = 999;
+    while (ptc4->COUNT16.SYNCBUSY.bit.CC0) { DBGC(DC_CLK_ENABLE_TIMEBASE_TC4_SYNC_CC0); }
+>>>>>>> master
     //ptc4->COUNT16.DBGCTRL.bit.DBGRUN = 1;
 
     //wave mode
@@ -191,17 +299,33 @@ uint32_t CLK_enable_timebase(void)
     NVIC_EnableIRQ(TC4_IRQn);
     ptc4->COUNT16.INTENSET.bit.MC0 = 1;
 
+<<<<<<< HEAD
     //configure TC5
     ptc5->COUNT16.CTRLA.bit.ENABLE = 0;
     while (ptc5->COUNT16.SYNCBUSY.bit.ENABLE) {}
     ptc5->COUNT16.CTRLA.bit.SWRST = 1;
     while (ptc5->COUNT16.SYNCBUSY.bit.SWRST) {}
     while (ptc5->COUNT16.CTRLA.bit.SWRST) {}
+=======
+    DBGC(DC_CLK_ENABLE_TIMEBASE_TC4_COMPLETE);
+
+    //configure TC5
+    DBGC(DC_CLK_ENABLE_TIMEBASE_TC5_BEGIN);
+    ptc5->COUNT16.CTRLA.bit.ENABLE = 0;
+    while (ptc5->COUNT16.SYNCBUSY.bit.ENABLE) { DBGC(DC_CLK_ENABLE_TIMEBASE_TC5_SYNC_DISABLE); }
+    ptc5->COUNT16.CTRLA.bit.SWRST = 1;
+    while (ptc5->COUNT16.SYNCBUSY.bit.SWRST) { DBGC(DC_CLK_ENABLE_TIMEBASE_TC5_SYNC_SWRST_1); }
+    while (ptc5->COUNT16.CTRLA.bit.SWRST) { DBGC(DC_CLK_ENABLE_TIMEBASE_TC5_SYNC_SWRST_2); }
+>>>>>>> master
 
     //CTRLA defaults
     //CTRLB as default, counting up
     ptc5->COUNT16.CTRLBCLR.reg = 5;
+<<<<<<< HEAD
     while (ptc5->COUNT16.SYNCBUSY.bit.CTRLB) {}
+=======
+    while (ptc5->COUNT16.SYNCBUSY.bit.CTRLB) { DBGC(DC_CLK_ENABLE_TIMEBASE_TC5_SYNC_CLTRB); }
+>>>>>>> master
     //ptc5->COUNT16.DBGCTRL.bit.DBGRUN = 1;
 
     //wave mode
@@ -212,6 +336,11 @@ uint32_t CLK_enable_timebase(void)
     NVIC_EnableIRQ(TC5_IRQn);
     ptc5->COUNT16.INTENSET.bit.MC0 = 1;
 
+<<<<<<< HEAD
+=======
+    DBGC(DC_CLK_ENABLE_TIMEBASE_TC5_COMPLETE);
+
+>>>>>>> master
     //unmask TC0,1, sourcegclk2 to TC0,1
     pmclk->APBAMASK.bit.TC0_ = 1;
     pgclk->PCHCTRL[TC0_GCLK_ID].bit.GEN = GEN_TC45;
@@ -222,16 +351,32 @@ uint32_t CLK_enable_timebase(void)
     pgclk->PCHCTRL[TC1_GCLK_ID].bit.CHEN = 1;
 
     //configure TC0
+<<<<<<< HEAD
     ptc0->COUNT32.CTRLA.bit.ENABLE = 0;
     while (ptc0->COUNT32.SYNCBUSY.bit.ENABLE) {}
     ptc0->COUNT32.CTRLA.bit.SWRST = 1;
     while (ptc0->COUNT32.SYNCBUSY.bit.SWRST) {}
     while (ptc0->COUNT32.CTRLA.bit.SWRST) {}
+=======
+    DBGC(DC_CLK_ENABLE_TIMEBASE_TC0_BEGIN);
+    ptc0->COUNT32.CTRLA.bit.ENABLE = 0;
+    while (ptc0->COUNT32.SYNCBUSY.bit.ENABLE) { DBGC(DC_CLK_ENABLE_TIMEBASE_TC0_SYNC_DISABLE); }
+    ptc0->COUNT32.CTRLA.bit.SWRST = 1;
+    while (ptc0->COUNT32.SYNCBUSY.bit.SWRST) { DBGC(DC_CLK_ENABLE_TIMEBASE_TC0_SYNC_SWRST_1); }
+    while (ptc0->COUNT32.CTRLA.bit.SWRST) { DBGC(DC_CLK_ENABLE_TIMEBASE_TC0_SYNC_SWRST_2); }
+>>>>>>> master
     //CTRLA as default
     ptc0->COUNT32.CTRLA.bit.MODE = 2; //32 bit mode
     ptc0->COUNT32.EVCTRL.bit.TCEI = 1; //enable incoming events
     ptc0->COUNT32.EVCTRL.bit.EVACT = 2 ; //count events
 
+<<<<<<< HEAD
+=======
+    DBGC(DC_CLK_ENABLE_TIMEBASE_TC0_COMPLETE);
+
+    DBGC(DC_CLK_ENABLE_TIMEBASE_EVSYS_BEGIN);
+
+>>>>>>> master
     //configure event system
     pmclk->APBBMASK.bit.EVSYS_ = 1;
     pgclk->PCHCTRL[EVSYS_GCLK_ID_0].bit.GEN = GEN_TC45;
@@ -241,10 +386,20 @@ uint32_t CLK_enable_timebase(void)
     pevsys->Channel[0].CHANNEL.bit.PATH = EVSYS_CHANNEL_PATH_SYNCHRONOUS_Val;     //Synchronous
     pevsys->Channel[0].CHANNEL.bit.EVGEN = EVSYS_ID_GEN_TC4_MCX_0;                //TC4 MC0
 
+<<<<<<< HEAD
+=======
+    DBGC(DC_CLK_ENABLE_TIMEBASE_EVSYS_COMPLETE);
+
+>>>>>>> master
     CLK_reset_time();
 
     ADC0_clock_init();
 
+<<<<<<< HEAD
+=======
+    DBGC(DC_CLK_ENABLE_TIMEBASE_COMPLETE);
+
+>>>>>>> master
     return 0;
 }
 
@@ -307,6 +462,11 @@ void clk_enable_sercom_apbmask(int sercomn)
 //call CLK_set_spi_freq(CHAN_SERCOM_SPI, FREQ_SPI_DEFAULT);
 uint32_t CLK_set_spi_freq(uint8_t sercomn, uint32_t freq)
 {
+<<<<<<< HEAD
+=======
+    DBGC(DC_CLK_SET_SPI_FREQ_BEGIN);
+
+>>>>>>> master
     Gclk *pgclk = GCLK;
     Sercom *psercom = (Sercom *)sercom_apbbase[sercomn];
     clk_enable_sercom_apbmask(sercomn);
@@ -320,9 +480,17 @@ uint32_t CLK_set_spi_freq(uint8_t sercomn, uint32_t freq)
     while (psercom->I2CM.CTRLA.bit.SWRST) {}
 
     psercom->SPI.BAUD.reg = (uint8_t) (system_clks.freq_gclk[0]/2/freq-1);
+<<<<<<< HEAD
     system_clks.freq_spi = system_clks.freq_dfll/2/(psercom->SPI.BAUD.reg+1);
     system_clks.freq_sercom[sercomn] = system_clks.freq_spi;
 
+=======
+    system_clks.freq_spi = system_clks.freq_gclk[0]/2/(psercom->SPI.BAUD.reg+1);
+    system_clks.freq_sercom[sercomn] = system_clks.freq_spi;
+
+    DBGC(DC_CLK_SET_SPI_FREQ_COMPLETE);
+
+>>>>>>> master
     return system_clks.freq_spi;
 }
 
@@ -330,6 +498,11 @@ uint32_t CLK_set_spi_freq(uint8_t sercomn, uint32_t freq)
 //call CLK_set_i2c0_freq(CHAN_SERCOM_I2C0, FREQ_I2C0_DEFAULT);
 uint32_t CLK_set_i2c0_freq(uint8_t sercomn, uint32_t freq)
 {
+<<<<<<< HEAD
+=======
+    DBGC(DC_CLK_SET_I2C0_FREQ_BEGIN);
+
+>>>>>>> master
     Gclk *pgclk = GCLK;
     Sercom *psercom = (Sercom *)sercom_apbbase[sercomn];
     clk_enable_sercom_apbmask(sercomn);
@@ -343,9 +516,17 @@ uint32_t CLK_set_i2c0_freq(uint8_t sercomn, uint32_t freq)
     while (psercom->I2CM.CTRLA.bit.SWRST) {}
 
     psercom->I2CM.BAUD.bit.BAUD = (uint8_t) (system_clks.freq_gclk[0]/2/freq-1);
+<<<<<<< HEAD
     system_clks.freq_i2c0 = system_clks.freq_dfll/2/(psercom->I2CM.BAUD.bit.BAUD+1);
     system_clks.freq_sercom[sercomn] = system_clks.freq_i2c0;
 
+=======
+    system_clks.freq_i2c0 = system_clks.freq_gclk[0]/2/(psercom->I2CM.BAUD.bit.BAUD+1);
+    system_clks.freq_sercom[sercomn] = system_clks.freq_i2c0;
+
+    DBGC(DC_CLK_SET_I2C0_FREQ_COMPLETE);
+
+>>>>>>> master
     return system_clks.freq_i2c0;
 }
 
@@ -353,6 +534,11 @@ uint32_t CLK_set_i2c0_freq(uint8_t sercomn, uint32_t freq)
 //call CLK_set_i2c1_freq(CHAN_SERCOM_I2C1, FREQ_I2C1_DEFAULT);
 uint32_t CLK_set_i2c1_freq(uint8_t sercomn, uint32_t freq)
 {
+<<<<<<< HEAD
+=======
+    DBGC(DC_CLK_SET_I2C1_FREQ_BEGIN);
+
+>>>>>>> master
     Gclk *pgclk = GCLK;
     Sercom *psercom = (Sercom *)sercom_apbbase[sercomn];
     clk_enable_sercom_apbmask(sercomn);
@@ -366,17 +552,35 @@ uint32_t CLK_set_i2c1_freq(uint8_t sercomn, uint32_t freq)
     while (psercom->I2CM.CTRLA.bit.SWRST) {}
 
     psercom->I2CM.BAUD.bit.BAUD = (uint8_t) (system_clks.freq_gclk[0]/2/freq-10);
+<<<<<<< HEAD
     system_clks.freq_i2c1 = system_clks.freq_dfll/2/(psercom->I2CM.BAUD.bit.BAUD+1);
     system_clks.freq_sercom[sercomn] = system_clks.freq_i2c1;
 
+=======
+    system_clks.freq_i2c1 = system_clks.freq_gclk[0]/2/(psercom->I2CM.BAUD.bit.BAUD+10);
+    system_clks.freq_sercom[sercomn] = system_clks.freq_i2c1;
+
+    DBGC(DC_CLK_SET_I2C1_FREQ_COMPLETE);
+
+>>>>>>> master
     return system_clks.freq_i2c1;
 }
 
 void CLK_init(void)
 {
+<<<<<<< HEAD
+=======
+    DBGC(DC_CLK_INIT_BEGIN);
+
+>>>>>>> master
     memset((void *)&system_clks,0,sizeof(system_clks));
 
     CLK_oscctrl_init();
     CLK_enable_timebase();
+<<<<<<< HEAD
+=======
+
+    DBGC(DC_CLK_INIT_COMPLETE);
+>>>>>>> master
 }
 

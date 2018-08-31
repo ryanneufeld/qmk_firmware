@@ -165,6 +165,11 @@ int main(void)
     led_ena;
     m15_ena;
 
+<<<<<<< HEAD
+=======
+    debug_code_init();
+
+>>>>>>> master
     CLK_init();
 
     ADC0_init();
@@ -176,9 +181,20 @@ int main(void)
     matrix_init();
 
     USB2422_init();
+<<<<<<< HEAD
     udc_start();
 
     CDC_init();
+=======
+
+    DBGC(DC_MAIN_UDC_START_BEGIN);
+    udc_start();
+    DBGC(DC_MAIN_UDC_START_COMPLETE);
+
+    DBGC(DC_MAIN_CDC_INIT_BEGIN);
+    CDC_init();
+    DBGC(DC_MAIN_CDC_INIT_COMPLETE);
+>>>>>>> master
 
     while (USB2422_Port_Detect_Init() == 0) {}
 
@@ -212,6 +228,11 @@ int main(void)
 
     v_5v_avg = adc_get(ADC_5V);
 
+<<<<<<< HEAD
+=======
+    debug_code_disable();
+
+>>>>>>> master
     while (1)
     {
         if (usb_state == USB_STATE_POWERDOWN)

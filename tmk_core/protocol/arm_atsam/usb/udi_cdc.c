@@ -52,8 +52,12 @@
 #include "udc.h"
 #include "udi_cdc.h"
 #include <string.h>
+<<<<<<< HEAD
 //#include "Mrepeat.h"
 #include "Udi_cdc_conf.h"
+=======
+#include "udi_cdc_conf.h"
+>>>>>>> master
 #include "udi_device_conf.h"
 #include "spfssf.h"
 #include "stdarg.h"

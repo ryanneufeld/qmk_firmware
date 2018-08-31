@@ -51,13 +51,22 @@
   #define ARM_MATH_CM4
 #endif
 
+<<<<<<< HEAD
 #include "Compiler.h"
+=======
+#include "compiler.h"
+>>>>>>> master
 #undef LITTLE_ENDIAN  //redefined in samd51j18a.h
 #include "samd51j18a.h"
 #include <stdbool.h>
 #include <string.h>
+<<<<<<< HEAD
 #include "Arm_math.h"
 #include "Status_codes.h"
+=======
+#include "arm_math.h"
+#include "status_codes.h"
+>>>>>>> master
 #include "usb.h"
 
 /** Fields definition from a LPM TOKEN  */
@@ -1053,7 +1062,11 @@ enum status_code usb_init(struct usb_module *module_inst, Usb *const hw,
     pport->Group[1].PINCFG[22].bit.PMUXEN = 1;
 
     //configure and enable DFLL for USB clock recovery mode at 48MHz
+<<<<<<< HEAD
     posc->DFLLCTRLA.bit.ENABLE=0;
+=======
+    posc->DFLLCTRLA.bit.ENABLE = 0;
+>>>>>>> master
     while (posc->DFLLSYNC.bit.ENABLE);
     while (posc->DFLLSYNC.bit.DFLLCTRLB);
     posc->DFLLCTRLB.bit.USBCRM = 1;
@@ -1065,7 +1078,11 @@ enum status_code usb_init(struct usb_module *module_inst, Usb *const hw,
     posc->DFLLCTRLB.bit.CCDIS = 1;
     posc->DFLLMUL.bit.MUL = 0xbb80;   //4800 x 1KHz
     while (posc->DFLLSYNC.bit.DFLLMUL);
+<<<<<<< HEAD
     posc->DFLLCTRLA.bit.ENABLE=1;
+=======
+    posc->DFLLCTRLA.bit.ENABLE = 1;
+>>>>>>> master
     while (posc->DFLLSYNC.bit.ENABLE);
 
     /* Setup clock for module */

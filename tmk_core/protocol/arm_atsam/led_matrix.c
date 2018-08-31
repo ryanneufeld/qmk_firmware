@@ -435,6 +435,11 @@ void led_matrix_run(led_setup_t *f)
 
 uint8_t led_matrix_init(void)
 {
+<<<<<<< HEAD
+=======
+    DBGC(DC_LED_MATRIX_INIT_BEGIN);
+
+>>>>>>> master
     issi3733_prepare_arrays();
 
     led_matrix_prepare();
@@ -459,6 +464,11 @@ uint8_t led_matrix_init(void)
     led_cur = 0;
     led_matrix_run((led_setup_t*)led_setups[led_animation_id]);
 
+<<<<<<< HEAD
+=======
+    DBGC(DC_LED_MATRIX_INIT_COMPLETE);
+
+>>>>>>> master
     return 0;
 }
 

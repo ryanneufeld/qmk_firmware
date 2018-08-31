@@ -12,23 +12,39 @@ HEX = $(OBJCOPY) -O $(FORMAT) -R .eeprom -R .fuse -R .lock -R .signature
 EEP = $(OBJCOPY) -j .eeprom --set-section-flags=.eeprom="alloc,load" --change-section-lma .eeprom=0 --no-change-warnings -O $(FORMAT)
 BIN =
 
+<<<<<<< HEAD
 COMMON_VPATH += $(DRIVER_PATH)/arm_atsam/packs/atmel/SAMD51_DFP/1.0.70/include
 COMMON_VPATH += $(DRIVER_PATH)/arm_atsam/packs/arm/cmsis/5.0.1/CMSIS/Include
+=======
+COMMON_VPATH += $(LIB_PATH)/arm_atsam/packs/atmel/SAMD51_DFP/1.0.70/include
+COMMON_VPATH += $(LIB_PATH)/arm_atsam/packs/arm/cmsis/5.0.1/CMSIS/Include
+>>>>>>> master
 
 COMPILEFLAGS += -funsigned-char
 COMPILEFLAGS += -funsigned-bitfields
 COMPILEFLAGS += -ffunction-sections
 COMPILEFLAGS += -fshort-enums
+<<<<<<< HEAD
+=======
+COMPILEFLAGS += -fno-inline-small-functions
+COMPILEFLAGS += -fno-strict-aliasing
+COMPILEFLAGS += -mfloat-abi=hard
+COMPILEFLAGS += -mfpu=fpv4-sp-d16
+COMPILEFLAGS += -mthumb
+>>>>>>> master
 
 #ALLOW_WARNINGS = yes
 
 CFLAGS += $(COMPILEFLAGS)
+<<<<<<< HEAD
 CFLAGS += -fno-inline-small-functions
 CFLAGS += -fno-strict-aliasing
 CFLAGS += -mfloat-abi=hard
 CFLAGS += -mfpu=fpv4-sp-d16
 #CFLAGS += -v
 #CFLAGS += -S
+=======
+>>>>>>> master
 
 CPPFLAGS += $(COMPILEFLAGS)
 CPPFLAGS += -fno-exceptions -std=c++11
@@ -38,7 +54,11 @@ LDFLAGS += -Wl,-Map="%OUT%%PROJ_NAME%.map"
 LDFLAGS += -Wl,--start-group
 LDFLAGS += -Wl,--end-group
 LDFLAGS += -Wl,--gc-sections
+<<<<<<< HEAD
 LDFLAGS += -T$(DRIVER_PATH)/arm_atsam/packs/atmel/SAMD51_DFP/1.0.70/gcc/gcc/samd51j18a_flash.ld
+=======
+LDFLAGS += -T$(LIB_PATH)/arm_atsam/packs/atmel/SAMD51_DFP/1.0.70/gcc/gcc/samd51j18a_flash.ld
+>>>>>>> master
 
 OPT_DEFS += -DPROTOCOL_ARM_ATSAM
 
